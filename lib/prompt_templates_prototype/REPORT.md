@@ -555,15 +555,13 @@ uv run python lib/prompt_templates_prototype/settings_sketch.py
 │   title                                    string                       剧集标题（可选，最终以 script_plan 内容为准）
 │   scenes                                   list[object]                 各分镜视觉层（按 scene_id 对齐 script_plan 内容）
 │   scenes[].scene_id                        string                       对齐锚：必须等于 script_plan 已定分镜的 scene_id
-│   scenes[].image_prompt                    object                       分镜图生成 Prompt
+│   scenes[].image_prompt                    object                       分镜图生成提示词
 │   scenes[].image_prompt.scene              string                       画面静态描述；动态内容由 video_prompt.action 承载
 │   scenes[].image_prompt.composition        object                       构图信息
 │   scenes[].image_prompt.composition.shot_type enum Extreme Close-up/Close-up/Medium Close-up/Medium Shot/Medium Long Shot/Long Shot/Extreme Long Shot/Over-the-shoulder/Point-of-view 镜头类型
 │   scenes[].image_prompt.composition.lighting string                       光线描述
 │   scenes[].image_prompt.composition.ambiance string                       整体氛围
-│   scenes[].video_prompt                    object                       drama 视频生成 Prompt：无 dialogue，口播由分镜级 ``DramaScene.utterances`` 统一承载。
-
-``extra="forbid"`` 下任何残留的 ``dialogue`` 键会被 ``DramaScene`` 读时迁移先行剥离。
+│   scenes[].video_prompt                    object                       视频生成提示词（无 dialogue，口播在 script_plan utterances）
 │   scenes[].video_prompt.action             string                       该分镜时长内的动作描述；镜头运动由 camera_motion 承载
 │   scenes[].video_prompt.camera_motion      enum Static/Pan Left/Pan Right/Tilt Up/Tilt Down/Zoom In/Zoom Out/Push In/Pull Out/Truck Left/Truck Right/Pedestal Up/Pedestal Down/Orbit/Tracking Shot/Shake 镜头运动
 │   scenes[].video_prompt.ambiance_audio     string                       环境音效（画内音）

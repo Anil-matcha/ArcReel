@@ -92,7 +92,8 @@ def _schema_lines(spec: str) -> list[str]:
         for name, prop in node.get("properties", {}).items():
             path = f"{prefix}{name}"
             resolved, hint = _resolve(prop, defs)
-            lines.append(f"{path:<40} {hint:<28} {resolved.get('description', prop.get('description', ''))}")
+            description = " ".join((prop.get("description") or resolved.get("description") or "").split())
+            lines.append(f"{path:<40} {hint:<28} {description}")
             child = resolved if "properties" in resolved else None
             if child is None and resolved.get("type") == "array":
                 items, _ = _resolve(resolved.get("items", {}), defs)
