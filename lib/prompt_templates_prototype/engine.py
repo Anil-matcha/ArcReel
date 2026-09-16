@@ -1,16 +1,24 @@
 """PROTOTYPE（issue #2460）——提示词模版引擎的最小可用形态，不进产品代码。
 
-回答的问题：「整段模版 + 命名变体片段 + 仅真值条件」能否无损承载现有 builder 的措辞，
-以及 Jinja2 沙箱 + StrictUndefined + 白名单过滤器在缺槽位 / 多余槽位 / 未知片段时
-何时、以什么信息报错。
+回答的问题：「整段模版 + 命名变体片段 + 仅真值条件」能否承载现有 builder 的措辞（允许
+经裁定的措辞收敛，差异以 diff 呈现），以及 Jinja2 沙箱 + StrictUndefined + 白名单过滤器在
+缺槽位 / 多余槽位 / 未知片段时何时、以什么信息报错。
 
 对调用方只暴露三个动作：``render`` / ``list_templates`` / ``read_source``。
 
 目录约定（``templates/``）：
 - ``<category>/<entry>.md``：一个生成入口一个文件，YAML frontmatter 放元数据，正文是完整提示词。
-- ``partials/<name>.md``：固定片段，模版内以 ``{{ partial("name") }}`` 引用；不存在即报错。
-- ``partials/<family>/<axis_value>.md``：命名变体片段，模版内以 ``{{ variant("family", axis_value) }}``
-  引用；family 目录不存在即报错，目录存在但该轴值无文件即渲染为空串。
+- ``partials/shared/<name>.md``：跨模版共享的固定片段，模版内以 ``{{ partial("shared/name") }}`` 引用；
+  不存在即报错。
+- ``partials/shared/<family>/<axis_value>.md``：跨模版共享的命名变体片段，
+  以 ``{{ variant("shared/family", axis_value) }}`` 引用；family 目录不存在即报错，目录存在但该轴值
+  无文件即渲染为空串。
+- ``partials/<template id>/<family>/<axis_value>.md``：单个模版私有的命名变体片段，目录名镜像模版 id
+  （如 ``partials/text/drama_script_plan/task/novel.md``），引用方式同上。只被一个模版引用的固定措辞
+  不做片段，直接写在模版正文里。
+
+片段名就是相对 ``partials/`` 的路径，引擎不做隐式查找；``shared/`` 与模版 id 前缀只是目录约定，
+让维护者一眼分清「动它会牵连别的入口」与「只属于这个入口」。
 
 片段渲染结果统一去掉尾部换行，由引用处决定换行——与现有 builder 里常量不带尾换行的用法一致。
 """
@@ -75,6 +83,7 @@ class TemplateMeta:
     slots: dict[str, str]
     protected: bool
     path: Path
+    output_schema: str | None = None  # "module:ClassName"，指向 response_schema 的 pydantic 模型；无结构化输出时为 None
     partials: list[str] = field(default_factory=list)  # 固定片段名与 "family/*"
 
 
@@ -155,6 +164,7 @@ class PromptTemplates:
                 slots=frontmatter.get("slots") or {},
                 protected=bool(frontmatter.get("protected", False)),
                 path=path,
+                output_schema=frontmatter.get("output_schema"),
             )
             if template_meta.id in self._registry:
                 other = self._registry[template_meta.id][0].path

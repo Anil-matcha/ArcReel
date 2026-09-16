@@ -79,14 +79,14 @@ def main() -> None:
         lambda: PromptTemplates(HERE / "fixtures_bad" / "unknown_partial"),
     )
     _show(
-        '3b 变体片段族拼错：variant("script_plan_tsak", …)',
+        '3b 变体片段族拼错：variant("script_plan_tsak", …)（族目录不存在）',
         "加载期；族目录不存在或为空即报错",
         lambda: PromptTemplates(HERE / "fixtures_bad" / "unknown_variant_family"),
     )
     _show(
-        '3c 对照：族存在但该轴值无文件——variant("script_plan_break_rule", "novel")',
-        "不报错——按 Spec「不存在的变体即为空」渲染为空串（novel 的 segment_break 规则正是靠这一条消失）",
-        lambda: GOOD.render("text/drama_script_plan", **GOOD_SLOTS)[0:0] or "（novel 渲染成功，见 render_check）",
+        '3c 对照：族存在但该轴值无文件——variant("text/drama_script_plan/task", "bogus")',
+        "不报错——按 Spec「不存在的变体即为空」渲染为空串；调用方回落未知 source_kind 到 novel 是槽位值生产者的事",
+        lambda: repr(GOOD.env.from_string('{{ variant("text/drama_script_plan/task", "bogus") }}').render()),
     )
     _show(
         "3d 渲染期兜底：片段名由表达式动态拼出、静态扫描扫不到时",

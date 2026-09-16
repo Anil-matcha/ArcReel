@@ -1,1 +1,0 @@
-自然语言字符串值必须使用 {{ target_language }}；JSON 键名 / 枚举值保持英文。例外（逐字保留原文、不翻译、不改写）：资产引用字段（`characters_in_scene[]` / `scenes[]` / `props[]`，须逐字等于 project.json 登记名）与逐字字段（`utterances[].text` / `utterances[].speaker` / `source_text`）；speaker 沿用 characters_in_scene 中登记的角色名原文，群演沿用原文称呼。

@@ -6,6 +6,7 @@ description: 为 script_plan 已定稿的每个分镜补全视觉层（image_pro
 applies_to:
   content_modes: [drama]
   generation_modes: [storyboard]
+output_schema: lib.script_models:DramaVisualScript
 slots:
   target_language: 输出语言（自然语言字符串值所用语言）
   project_overview: 项目概述，键齐全的对象 {synopsis, genre, theme, world_setting}
@@ -21,14 +22,12 @@ protected: false
 ---
 # 角色与任务
 
-{{ partial("drama_visual_role") }}
-你的任务：基于下方已定稿的「分镜内容」，为每个 scene_id 逐条产出视觉层 JSON（image_prompt / video_prompt）。
+你是一位资深的短剧分镜摄影 / 动作设计师。下方分镜内容（分镜边界、出场资产、逐字口播、原文锚、视觉改编描述）均已定稿，你的唯一职责是为每个分镜补全视觉生产层：image_prompt（画面）与 video_prompt（动作 / 运镜 / 环境音）。**不要新增 / 删除 / 重排分镜、不要改动分镜内容。**
 
 **输出语言**：所有字符串值必须使用 {{ target_language }}；JSON 键名 / 枚举值保持英文。
 **结构约束**：字段 / 枚举 / 必填项由 response_schema 强制；本提示只解释**如何写好每个字段的内容**。
-**对齐约束**：每个分镜产出一条视觉层，`scene_id` 必须与下方内容逐字一致、不增不减不改；不要输出口播 / 时长 / 资产等非视觉字段。
 
-{{ partial("pacing/drama") }}
+{{ partial("shared/pacing/drama") }}
 
 # 上下文
 
@@ -48,18 +47,18 @@ protected: false
 
 {% if assets %}
 <characters>
-{{ partial("asset_appearance_bullets", entries=assets.characters) }}
+{{ partial("shared/asset_appearance_bullets", entries=assets.characters) }}
 </characters>
 
 <scenes>
-{{ partial("asset_appearance_bullets", entries=assets.scenes) }}
+{{ partial("shared/asset_appearance_bullets", entries=assets.scenes) }}
 </scenes>
 
 <props>
-{{ partial("asset_appearance_bullets", entries=assets.props) }}
+{{ partial("shared/asset_appearance_bullets", entries=assets.props) }}
 </props>
 
-{{ partial("asset_appearance_note") }}
+{{ partial("shared/asset_appearance_note") }}
 
 {% endif %}
 分镜内容中的「口播」与「原文锚」仅供理解戏剧节奏与语境，不要复制进视觉字段。
@@ -69,7 +68,7 @@ protected: false
 </shots>
 
 <episode_constraints>
-当前正在生成第 {{ episode }} 集。每条视觉层的 scene_id 必须逐字等于上方分镜内容里的 scene_id；若该 ID 含拆分/编辑后缀（如 `_1`），也必须原样保留，不得改写、合并或新增。
+当前正在生成第 {{ episode }} 集。每个分镜产出一条视觉层，`scene_id` 必须逐字等于上方分镜内容里的 scene_id（含拆分 / 编辑后缀，如 `_1`），不增不减不改；不要输出口播 / 时长 / 资产等非视觉字段。
 </episode_constraints>
 
 # 字段写作指引
@@ -78,23 +77,21 @@ protected: false
 
 ## 图片提示词（image_prompt）——切换到「摄影师」视角
 
-- **image_prompt.scene**：{{ partial("scene_writing_guide") }}
+- **image_prompt.scene**：{{ partial("shared/scene_writing_guide") }}
 - **image_prompt.composition.shot_type**：从枚举中按画面内容选择，不强加倾向。
-- **image_prompt.composition.lighting**：{{ partial("lighting_writing_guide") }}
-- **image_prompt.composition.ambiance**：{{ partial("ambiance_writing_guide") }}
+- **image_prompt.composition.lighting**：{{ partial("shared/lighting_writing_guide") }}
+- **image_prompt.composition.ambiance**：{{ partial("shared/ambiance_writing_guide") }}
 
 ## 视频提示词（video_prompt）——切换到「动作设计师」视角
 
-- **video_prompt.action**：{{ partial("action_writing_guide") }}
-- **video_prompt.camera_motion**：按画面内容自行选择。
-- **video_prompt.ambiance_audio**：{{ partial("ambiance_audio_writing_guide") }}
+- **video_prompt.action**：{{ partial("shared/action_writing_guide") }}
+- **video_prompt.ambiance_audio**：{{ partial("shared/ambiance_audio_writing_guide") }}
 
 # 创作目标
 
-{{ partial("drama_visual_goal") }}
+输出可直接驱动 AI 图像 / 视频生成的、视觉一致、节奏紧凑的视觉层。忠于已定稿的分镜内容与戏剧张力。
 {% if instructions %}
 
-
 # 附加指令
-{{ instructions -}}
+{{ instructions }}
 {% endif %}

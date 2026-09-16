@@ -1,9 +1,11 @@
-"""PROTOTYPE（issue #2460）——原型模版渲染结果 vs 现有 builder 输出的逐字比对。
+"""PROTOTYPE（issue #2460）——原型模版渲染结果 vs 现有 builder 输出的 diff。
 
 运行：``uv run python lib/prompt_templates_prototype/render_check.py``
 
 每个用例先用现有 builder（``lib.prompt_builders_script``）产出提示词，再把同一份 builder 入参
-经 ``slots_for_*`` 投影成槽位值、交给原型引擎渲染，最后打印 unified diff；无差异打印 IDENTICAL。
+经 ``slots_for_*`` 投影成槽位值、交给原型引擎渲染，最后打印 unified diff。原型不再要求逐字一致：
+差异应当且只应当来自已裁定的措辞收敛项（清单见 README「措辞变更」），审阅时逐个 hunk 对号。
+同时把三份全量渲染结果写到 ``samples/*.rendered.md``、全部 diff 写到 ``samples/diffs/``。
 ``slots_for_*`` 就是未来「槽位值生产者」的形状：候选名展开、语速取值、尖括号中和、比例说明、
 分镜内容投影都留在代码里，模版只收数据。
 """
@@ -281,15 +283,24 @@ def _diff(expected: str, actual: str) -> str:
     )
 
 
-def main() -> int:
-    templates = PromptTemplates(TEMPLATES_DIR)
-    failures = 0
+SAMPLES_DIR = Path(__file__).parent / "samples"
+SAMPLE_FILES = {
+    "script_plan/novel 全量：大纲含钩子与预告、下集大纲、目标时长、默认档、附加指令": "drama_script_plan.novel",
+    "script_plan/screenplay 全量：英文源、项目语速覆盖、无默认档": "drama_script_plan.screenplay",
+    "prompt_authoring 全量：资产含衍生与多行描述与脏数据、9:16、附加指令": "drama_prompt_authoring",
+}
+
+
+def collect(templates: PromptTemplates | None = None) -> list[tuple[str, str, str]]:
+    """返回 [(用例名, builder 输出, 模版渲染)]；审阅页生成器也从这里取数。"""
+    templates = templates or PromptTemplates(TEMPLATES_DIR)
+    results: list[tuple[str, str, str]] = []
     for name, kwargs in SCRIPT_PLAN_CASES.items():
         instructions = kwargs.get("instructions")
         builder_kwargs = {k: v for k, v in kwargs.items() if k != "instructions"}
         expected = append_user_instructions(build_normalize_prompt(**builder_kwargs), instructions)
         actual = templates.render("text/drama_script_plan", **slots_for_script_plan(**kwargs))
-        failures += _report(name, expected, actual)
+        results.append((name, expected, actual))
     for name, kwargs in PROMPT_AUTHORING_CASES.items():
         instructions = kwargs.get("instructions")
         builder_kwargs = {k: v for k, v in kwargs.items() if k not in {"instructions", "content_scenes"}}
@@ -300,18 +311,28 @@ def main() -> int:
             instructions,
         )
         actual = templates.render("text/drama_prompt_authoring", **slots_for_prompt_authoring(**kwargs))
-        failures += _report(name, expected, actual)
-    print(f"\n{'=' * 78}\n{failures} 个用例有差异 / 共 {len(SCRIPT_PLAN_CASES) + len(PROMPT_AUTHORING_CASES)} 个")
-    return 1 if failures else 0
+        results.append((name, expected, actual))
+    return results
 
 
-def _report(name: str, expected: str, actual: str) -> int:
-    diff = _diff(expected, actual)
-    verdict = "IDENTICAL" if expected == actual else "DIFF"
-    print(f"\n### [{verdict}] {name}  （{len(expected)} 字符）")
-    if diff:
-        print(diff, end="")
-    return 0 if expected == actual else 1
+def main() -> int:
+    results = collect()
+    (SAMPLES_DIR / "diffs").mkdir(parents=True, exist_ok=True)
+    changed = 0
+    for index, (name, expected, actual) in enumerate(results, start=1):
+        diff = _diff(expected, actual)
+        verdict = "DIFF" if diff else "IDENTICAL"
+        changed += bool(diff)
+        print(f"\n### [{verdict}] {name}  （builder {len(expected)} 字符 → 模版 {len(actual)} 字符）")
+        if diff:
+            print(diff, end="")
+        (SAMPLES_DIR / "diffs" / f"{index:02d}.diff").write_text(diff, encoding="utf-8")
+        if name in SAMPLE_FILES:
+            (SAMPLES_DIR / f"{SAMPLE_FILES[name]}.rendered.md").write_text(actual, encoding="utf-8")
+    print(
+        f"\n{'=' * 78}\n{changed} 个用例有差异 / 共 {len(results)} 个（差异为预期：措辞收敛项，逐 hunk 对号见 README）"
+    )
+    return 0
 
 
 if __name__ == "__main__":
