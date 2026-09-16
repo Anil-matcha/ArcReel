@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
-import { FileJson2, Loader2, Lock, Plus, Upload } from "lucide-react";
+import { FileJson2, Loader2, Lock, Plus, Store, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { API } from "@/api";
 import { errMsg, voidCall } from "@/utils/async";
@@ -292,6 +292,7 @@ export function EndpointsSection() {
             <Upload className="h-3.5 w-3.5" aria-hidden />
             {t("ce_import")}
           </button>
+
           <input
             ref={fileInputRef}
             type="file"
@@ -304,6 +305,16 @@ export function EndpointsSection() {
             }}
           />
         </div>
+        {/* PROTOTYPE：市场入口 */}
+        <button
+          type="button"
+          onClick={() => navigate(`${location}?section=market`)}
+          title="从市场浏览并安装调用端点"
+          className={`${GHOST_BTN_CLS} mb-3 w-[calc(100%-0.5rem)] justify-center border-dashed mx-1`}
+        >
+          <Store className="h-3.5 w-3.5" aria-hidden />
+          从市场安装
+        </button>
 
         {selectedKey === "new" && (
           <div className="mb-4">
