@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.31.0](https://github.com/ArcReel/ArcReel/compare/v0.30.0...v0.31.0) (2026-09-16)
+
+
+### ✨ 新功能
+
+* **market:** 支持生成校验市场源并提示端点版本要求 ([927d112](https://github.com/ArcReel/ArcReel/commit/927d1125e46e9e6af6a2f0cd2f6ecaf1cedd1d6e)), closes [#2490](https://github.com/ArcReel/ArcReel/issues/2490)
+* **migrations:** 遗留风格值一次性归一为项目 schema 迁移 ([6e851c7](https://github.com/ArcReel/ArcReel/commit/6e851c74ec04fbbeac0c912d7ee9f75e15ca3029)), closes [#2462](https://github.com/ArcReel/ArcReel/issues/2462)
+* **prompts:** 分集规划提示词整段模版化 ([e9e926b](https://github.com/ArcReel/ArcReel/commit/e9e926ba919e9fdbe140451d4eee3055e6d9cc2e)), closes [#2468](https://github.com/ArcReel/ArcReel/issues/2468)
+* **prompts:** 参考生视频单元拆分与提示词编写整段模版化 ([8d2c871](https://github.com/ArcReel/ArcReel/commit/8d2c8717430e0dc9e2ed53c19023b2fde6250c0a)), closes [#2473](https://github.com/ArcReel/ArcReel/issues/2473)
+* **prompts:** 参考生视频提示词整段模版化并收敛第三段 ([076b2f9](https://github.com/ArcReel/ArcReel/commit/076b2f9766b38f50e741d20c42aef640bf403582)), closes [#2471](https://github.com/ArcReel/ArcReel/issues/2471)
+* **prompts:** 宫格联合图提示词整段模版化 ([9318b9a](https://github.com/ArcReel/ArcReel/commit/9318b9a7792a05fe46fd5413a18beb3357e2aa25)), closes [#2466](https://github.com/ArcReel/ArcReel/issues/2466)
+* **prompts:** 广告片两条路线整段模版化 ([aaa0572](https://github.com/ArcReel/ArcReel/commit/aaa05720584d9a652a55d6ee340f983e3de21c7a)), closes [#2472](https://github.com/ArcReel/ArcReel/issues/2472)
+* **prompts:** 提示词编写与旁白切分整段模版化并收敛措辞 ([4ba6f47](https://github.com/ArcReel/ArcReel/commit/4ba6f47ef94b810e23142bd48b14d3d84d66cfb5)), closes [#2469](https://github.com/ArcReel/ArcReel/issues/2469)
+* **prompts:** 源文总览与 drama 脚本规划整段模版化 ([5088643](https://github.com/ArcReel/ArcReel/commit/5088643857474f2acce5c67c1e77b77969f2e2cd)), closes [#2467](https://github.com/ArcReel/ArcReel/issues/2467)
+* **prompts:** 统一分镜提示词包装并补全视频排除项 ([dd49080](https://github.com/ArcReel/ArcReel/commit/dd4908012560cec74a424ec0c7a1f234133b588d)), closes [#2465](https://github.com/ArcReel/ArcReel/issues/2465)
+* **prompts:** 统一资产图提示词模版与变体片段 ([6d0201f](https://github.com/ArcReel/ArcReel/commit/6d0201f9767af7a4f721777cbb6b4b3a0b9eca33))
+* **prompts:** 风格分析与 Agent 语言规范收编为模版，人设并入 CLAUDE.md ([4c19a8e](https://github.com/ArcReel/ArcReel/commit/4c19a8e600a71446bf53c5cc047b888c65327d6d))
+* **settings:** 在提示词模版中展示 36 条画风 ([abc2178](https://github.com/ArcReel/ArcReel/commit/abc2178854dd24fc7e0a878ff4163a5e89b7b5d5)), closes [#2474](https://github.com/ArcReel/ArcReel/issues/2474)
+* **settings:** 新增提示词模版只读浏览 ([e88abfd](https://github.com/ArcReel/ArcReel/commit/e88abfdfba424ba83839076ebc8d5f675d3bbbfe)), closes [#2464](https://github.com/ArcReel/ArcReel/issues/2464)
+
+
+### 🐛 Bug 修复
+
+* **market:** 收敛审查循环——市场源校验对畸形输入给出诊断，工作流索引名回退与符号链接处理一致 ([3d35d2e](https://github.com/ArcReel/ArcReel/commit/3d35d2e4dd2502632afcb8e915b664d9650b77b0))
+* **prompts:** 判重改为模版显式开启并逐行判定，收敛风格值归一化 ([2bb1458](https://github.com/ArcReel/ArcReel/commit/2bb1458a1706217191307ad391e8dc0550fd3b7d)), closes [#2486](https://github.com/ArcReel/ArcReel/issues/2486)
+* **prompts:** 统一文本模版的适用轴与上下文块，补齐广告参考路线的衍生候选 ([ce1628a](https://github.com/ArcReel/ArcReel/commit/ce1628a749249682d8fdd06f04defae6a6c844ec)), closes [#2467](https://github.com/ArcReel/ArcReel/issues/2467) [#2469](https://github.com/ArcReel/ArcReel/issues/2469) [#2472](https://github.com/ArcReel/ArcReel/issues/2472) [#2473](https://github.com/ArcReel/ArcReel/issues/2473)
+* **settings:** 输出结构页保留联合类型的全部分支 ([f53fcf3](https://github.com/ArcReel/ArcReel/commit/f53fcf3bfa9b80244881cfa3cf71debbbb7e358d)), closes [#2464](https://github.com/ArcReel/ArcReel/issues/2464) [#2465](https://github.com/ArcReel/ArcReel/issues/2465)
+* **text_backends:** 降级链识别 Instructor reask 崩溃并剥离 think 思考块 ([#2446](https://github.com/ArcReel/ArcReel/issues/2446)) ([93f1464](https://github.com/ArcReel/ArcReel/commit/93f14642506f13a6ee78c4b7c6d54ce3dfa8ad7c))
+
+
+### 📚 文档
+
+* **market:** 登记市场系术语并记录零服务端市场与安装记录 ADR ([#2479](https://github.com/ArcReel/ArcReel/issues/2479)) ([306c271](https://github.com/ArcReel/ArcReel/commit/306c2712e7226d335287273ab0295624b3d23f3b))
+* **prompts:** 对齐负向提示词与片段引用的术语口径 ([f2c3e90](https://github.com/ArcReel/ArcReel/commit/f2c3e90dddbc3f00bda25612d3bb831c254c6308)), closes [#2461](https://github.com/ArcReel/ArcReel/issues/2461) [#2463](https://github.com/ArcReel/ArcReel/issues/2463)
+* **prompts:** 明确整段提示词模版与命名变体边界 ([88fd58b](https://github.com/ArcReel/ArcReel/commit/88fd58b5e7a25350c7bf61920456e65d331900aa)), closes [#2461](https://github.com/ArcReel/ArcReel/issues/2461)
+* **readme:** add Fluxion AI to sponsors ([#2458](https://github.com/ArcReel/ArcReel/issues/2458)) ([79f6970](https://github.com/ArcReel/ArcReel/commit/79f697026ccf981c44f3650c29fbf8faa1e4463d))
+
 ## [0.30.0](https://github.com/ArcReel/ArcReel/compare/v0.29.0...v0.30.0) (2026-09-10)
 
 ### 🌟 版本亮点
