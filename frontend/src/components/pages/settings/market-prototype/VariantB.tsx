@@ -184,7 +184,7 @@ function BrowseB({ proto }: { proto: MarketProto }) {
   );
 }
 
-function ConfirmB({ entry, proto, onClose }: { entry: EntryView; proto: MarketProto; onClose: () => void }) {
+export function ConfirmB({ entry, proto, onClose }: { entry: EntryView; proto: MarketProto; onClose: () => void }) {
   const [choice, setChoice] = useState<SameIdentityChoice>({ kind: "copy" });
   const [done, setDone] = useState(false);
   const mode = entry.installation?.state === "update_available" ? "update" : "install";

@@ -14,7 +14,7 @@ import { PillSwitch } from "@/components/ui/PillSwitch";
 import { CONTRIBUTING_URL, ENTRY_TYPES, STATUS_LABEL, THIRD_PARTY_NOTICE, relativeTime, type EntryView, type MarketProto, type ProtoSource } from "./fixtures";
 import {
   Badge, BlockHeader, BlockHints, BlockSameIdentity, BlockSuccess, BlockTrust, BlockValidation, EntryIcon, InstallBadges,
-  KICKER_ACCENT_CLS, KICKER_CLS, MinVersionNote, ModifiedWarning, SourceStatusLine, StatusDot, primaryActionLabel, type SameIdentityChoice,
+  KICKER_ACCENT_CLS, KICKER_CLS, MinVersionNote, ModifiedWarning, SourceChip, SourceStatusLine, StatusDot, primaryActionLabel, type SameIdentityChoice,
 } from "./pieces";
 
 export const VARIANT_C_NAME = "按源货架";
@@ -113,7 +113,7 @@ export function VariantC({ proto }: { proto: MarketProto }) {
   );
 }
 
-function TileC({ entry, onOpen }: { entry: EntryView; onOpen: () => void }) {
+export function TileC({ entry, onOpen, showSource }: { entry: EntryView; onOpen: () => void; showSource?: boolean }) {
   return (
     <button
       type="button"
@@ -132,6 +132,7 @@ function TileC({ entry, onOpen }: { entry: EntryView; onOpen: () => void }) {
         <div className="truncate text-[13.5px] font-medium text-text">{entry.name}</div>
         <div className="mt-0.5 truncate text-[11.5px] text-text-4">{entry.author} · v{entry.version}</div>
         <p className="mt-1.5 line-clamp-2 flex-1 text-[11.5px] leading-[1.5] text-text-3">{entry.description}</p>
+        {showSource && <div className="mt-2"><SourceChip source={entry.source} /></div>}
         <div className="mt-3 flex items-center justify-between">
           <MinVersionNote entry={entry} />
           <span className={`ml-auto ${entry.installation?.state === "current" ? GHOST_BTN_CLS : ACCENT_BTN_SM_CLS} pointer-events-none`} style={entry.installation?.state === "current" ? undefined : ACCENT_BUTTON_STYLE}>
@@ -194,7 +195,7 @@ function Block({ kicker, title, children }: { kicker: string; title: string; chi
   );
 }
 
-function ManageC({ proto, onClose }: { proto: MarketProto; onClose: () => void }) {
+export function ManageC({ proto, onClose }: { proto: MarketProto; onClose: () => void }) {
   const [address, setAddress] = useState("");
   const [dragId, setDragId] = useState<number | null>(null);
   return (

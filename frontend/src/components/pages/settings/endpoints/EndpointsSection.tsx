@@ -313,7 +313,7 @@ export function EndpointsSection() {
           className={`${GHOST_BTN_CLS} mb-3 w-[calc(100%-0.5rem)] justify-center border-dashed mx-1`}
         >
           <Store className="h-3.5 w-3.5" aria-hidden />
-          从市场安装
+          从市场获取
         </button>
 
         {selectedKey === "new" && (

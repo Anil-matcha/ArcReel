@@ -14,25 +14,27 @@ import { InstallBadges, KICKER_ACCENT_CLS } from "./pieces";
 import { VARIANT_A_NAME, VariantA } from "./VariantA";
 import { VARIANT_B_NAME, VariantB } from "./VariantB";
 import { VARIANT_C_NAME, VariantC } from "./VariantC";
+import { VARIANT_D_NAME, VariantD } from "./VariantD";
 
 const VARIANTS = [
   { key: "a", name: VARIANT_A_NAME },
   { key: "b", name: VARIANT_B_NAME },
   { key: "c", name: VARIANT_C_NAME },
+  { key: "d", name: VARIANT_D_NAME },
 ];
 
 export function MarketPrototypeSection() {
   const search = useSearch();
-  const variant = new URLSearchParams(search).get("variant") ?? "a";
+  const variant = new URLSearchParams(search).get("variant") ?? "d";
   const proto = useMarketProto();
   const [preview, setPreview] = useState(false);
 
   return (
     <>
-      {variant === "b" ? <VariantB proto={proto} /> : variant === "c" ? <VariantC proto={proto} /> : <VariantA proto={proto} />}
+      {variant === "a" ? <VariantA proto={proto} /> : variant === "b" ? <VariantB proto={proto} /> : variant === "c" ? <VariantC proto={proto} /> : <VariantD proto={proto} />}
       <PrototypeSwitcher
         variants={VARIANTS}
-        current={VARIANTS.some((v) => v.key === variant) ? variant : "a"}
+        current={VARIANTS.some((v) => v.key === variant) ? variant : "d"}
         extra={<button type="button" className="rounded-full px-2 py-0.5 text-[11px] hover:bg-black/10" onClick={() => setPreview(true)}>端点详情预览</button>}
       />
       <GlassModal open={preview} onClose={() => setPreview(false)} ariaLabel="端点详情头部预览" widthClassName="w-full max-w-2xl">
