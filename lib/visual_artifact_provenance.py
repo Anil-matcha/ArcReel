@@ -16,6 +16,8 @@ from lib.artifact_manifest import ArtifactBasis
 from lib.asset_types import ASSET_TYPES, normalize_asset_name
 from lib.content_digest import sha256_file
 from lib.grid.prompt_builder import project_grid_image_prompt
+from lib.project_schema import parse_project_schema_version
+from lib.prompt_style import normalize_style_value
 from lib.prompt_utils import project_storyboard_image_prompt
 from lib.reference_video.request_projection import ResolvedReferenceAsset
 from lib.reference_video.text_parser import strip_speech_marks
@@ -176,8 +178,7 @@ def build_storyboard_image_visual_basis(
     }
     if style_input or not isinstance(prompt, str):
         inputs["style"] = style_input
-    if normalized_description := style_description.strip():
-        inputs["style_description"] = normalized_description
+    _add_style_description(inputs, style_description)
     return ArtifactBasis.build(
         "artifact-visual/storyboard-image",
         kind_version=1,
@@ -193,26 +194,29 @@ def build_grid_composite_visual_basis(
     columns: int,
     style: str,
     grid_aspect_ratio: str,
+    style_description: str = "",
     references: Sequence[VisualReference] = (),
 ) -> ArtifactBasis:
     """Describe one grid composite without hashing its rendered provider prompt."""
 
     member_tuple = _validate_grid_members(members, rows=rows, columns=columns)
     _require_string("style", style)
+    inputs: dict[str, object] = {
+        "group_id": _require_non_empty("group_id", group_id),
+        "cells": _project_grid_cells(member_tuple),
+        "layout": {
+            "rows": rows,
+            "columns": columns,
+            "grid_aspect_ratio": _require_non_empty("grid_aspect_ratio", grid_aspect_ratio),
+        },
+        "style": style,
+        "references": _reference_evidence(references),
+    }
+    _add_style_description(inputs, style_description)
     return ArtifactBasis.build(
         "artifact-visual/grid-composite",
         kind_version=1,
-        inputs={
-            "group_id": _require_non_empty("group_id", group_id),
-            "cells": _project_grid_cells(member_tuple),
-            "layout": {
-                "rows": rows,
-                "columns": columns,
-                "grid_aspect_ratio": _require_non_empty("grid_aspect_ratio", grid_aspect_ratio),
-            },
-            "style": style,
-            "references": _reference_evidence(references),
-        },
+        inputs=inputs,
     )
 
 
@@ -226,6 +230,7 @@ def build_grid_member_storyboard_visual_basis(
     columns: int,
     style: str,
     member_aspect_ratio: str,
+    style_description: str = "",
     references: Sequence[VisualReference] = (),
     source_composite_digest: str | None = None,
 ) -> ArtifactBasis:
@@ -241,21 +246,23 @@ def build_grid_member_storyboard_visual_basis(
     if type(cell_index) is not int or not 0 <= cell_index < len(member_tuple):
         raise ValueError("cell_index must identify a content cell")
     _require_string("style", style)
+    inputs: dict[str, object] = {
+        "group_id": _require_non_empty("group_id", group_id),
+        "cell": _project_grid_cells(member_tuple)[cell_index],
+        "layout": {
+            "rows": rows,
+            "columns": columns,
+            "member_aspect_ratio": _require_non_empty("member_aspect_ratio", member_aspect_ratio),
+        },
+        "style": style,
+        "references": _reference_evidence(references),
+        "source_composite": _composite_evidence(composite_image, source_composite_digest),
+    }
+    _add_style_description(inputs, style_description)
     return ArtifactBasis.build(
         "artifact-visual/grid-member",
         kind_version=1,
-        inputs={
-            "group_id": _require_non_empty("group_id", group_id),
-            "cell": _project_grid_cells(member_tuple)[cell_index],
-            "layout": {
-                "rows": rows,
-                "columns": columns,
-                "member_aspect_ratio": _require_non_empty("member_aspect_ratio", member_aspect_ratio),
-            },
-            "style": style,
-            "references": _reference_evidence(references),
-            "source_composite": _composite_evidence(composite_image, source_composite_digest),
-        },
+        inputs=inputs,
     )
 
 
@@ -356,6 +363,7 @@ def build_reference_video_artifact_visual_basis(
     request_assets: Sequence[ResolvedReferenceAsset],
     style: str | None,
     aspect_ratio: str,
+    style_description: str = "",
 ) -> ArtifactBasis:
     """Describe one canonical ``video_unit`` and the images actually sent for it.
 
@@ -380,17 +388,42 @@ def build_reference_video_artifact_visual_basis(
         )
         for asset in request_assets
     ]
+    inputs: dict[str, object] = {
+        "unit_id": unit_id,
+        "visual_lines": visual_lines,
+        "style": style or "",
+        "canvas": {"aspect_ratio": _require_non_empty("aspect_ratio", aspect_ratio)},
+        "request_references": _reference_evidence(references),
+    }
+    _add_style_description(inputs, style_description)
     return ArtifactBasis.build(
         "artifact-visual/video-reference",
         kind_version=1,
-        inputs={
-            "unit_id": unit_id,
-            "visual_lines": visual_lines,
-            "style": style or "",
-            "canvas": {"aspect_ratio": _require_non_empty("aspect_ratio", aspect_ratio)},
-            "request_references": _reference_evidence(references),
-        },
+        inputs=inputs,
     )
+
+
+#: 宫格联合图、切格分镜与参考视频的依据从这一 schema 起记风格描述。
+STYLE_DESCRIPTION_BASIS_SCHEMA_VERSION = 14
+
+
+def project_basis_style_description(project: Mapping[str, object]) -> str:
+    """宫格联合图、切格分镜与参考视频的依据所记的风格描述。
+
+    schema 低于 14 的项目只在迁移链中出现：v13→v14 之前各步的整份激活与来源补写沿用那时不记描述
+    的口径，描述由 v13→v14 连同选中版本记录一并补记。
+    """
+
+    if parse_project_schema_version(project) < STYLE_DESCRIPTION_BASIS_SCHEMA_VERSION:
+        return ""
+    return normalize_style_value(project.get("style_description"))
+
+
+def _add_style_description(inputs: dict[str, object], style_description: str) -> None:
+    """风格描述非空才入依据：描述为空的项目摘要与不记描述时逐字一致，存量产物不因此过期。"""
+
+    if normalized := _require_string("style_description", style_description).strip():
+        inputs["style_description"] = normalized
 
 
 def _reference_visual_lines(text: str) -> list[str]:

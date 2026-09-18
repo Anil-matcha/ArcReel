@@ -71,6 +71,7 @@ from lib.visual_artifact_provenance import (
     build_grid_composite_visual_basis,
     build_grid_member_storyboard_visual_basis,
     build_storyboard_image_visual_basis,
+    project_basis_style_description,
     visual_file_digest,
 )
 
@@ -751,6 +752,7 @@ class TargetStatePlanner:
                     rows=grid.rows,
                     columns=grid.cols,
                     style=str(self.project.get("style") or ""),
+                    style_description=project_basis_style_description(self.project),
                     grid_aspect_ratio=grid_aspect_ratio_for(grid.rows, grid.cols, member_ratio),
                     references=references,
                 )
@@ -812,6 +814,7 @@ class TargetStatePlanner:
                         rows=grid.rows,
                         columns=grid.cols,
                         style=str(self.project.get("style") or ""),
+                        style_description=project_basis_style_description(self.project),
                         member_aspect_ratio=member_ratio,
                         references=references,
                         source_composite_digest=composite_digest,

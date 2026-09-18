@@ -50,6 +50,7 @@ from lib.video_visual_provenance import resolve_video_aspect_ratio
 from lib.visual_artifact_provenance import (
     build_reference_video_artifact_visual_basis,
     build_storyboard_video_artifact_visual_basis,
+    project_basis_style_description,
 )
 
 AudioManifestEntryResolver = Callable[[ArtifactKey], ArtifactManifestEntry | None]
@@ -182,6 +183,7 @@ def project_video_basis_components(
             unit=item,
             request_assets=clamp_reference_assets(hydration.available, shape.reference_image_limit),
             style=project.get("style") if isinstance(project.get("style"), str) else None,
+            style_description=project_basis_style_description(project),
             aspect_ratio=resolve_video_aspect_ratio(project),
         )
     else:

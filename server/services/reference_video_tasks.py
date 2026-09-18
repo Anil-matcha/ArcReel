@@ -68,7 +68,7 @@ from lib.thumbnail import extract_video_thumbnail
 from lib.version_manager import VersionManager
 from lib.video_artifact_facts import VideoArtifactCurrencyFacts
 from lib.video_visual_provenance import resolve_video_aspect_ratio
-from lib.visual_artifact_provenance import build_reference_video_artifact_visual_basis
+from lib.visual_artifact_provenance import build_reference_video_artifact_visual_basis, project_basis_style_description
 from server.services.generation_context import AudioLaneRequest, VideoLaneRequest, resolve_generation_context
 from server.services.generation_tasks import get_project_manager
 from server.services.narration_delivery_tasks import (
@@ -644,6 +644,7 @@ async def execute_reference_video_task(
                     unit=unit,
                     request_assets=staged_request_assets,
                     style=project.get("style"),
+                    style_description=project_basis_style_description(project),
                     aspect_ratio=aspect_ratio,
                 )
             )
